@@ -9,44 +9,41 @@ import {
   Query,
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
-import { Task } from './task.model';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { FilterTaskDto } from './dto/filter-task.dto';
+import { Task } from './task.entity';
 
 @Controller('tasks')
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
   @Get()
-  getAll(@Query() filterTaskDto: FilterTaskDto): Task[] {
-    // Case 1: The Filter defined, call tasksService.getTasksFilter
-    if (Object.keys(filterTaskDto).length) {
-      const tasks = this.tasksService.getTasksFilter(filterTaskDto);
-      return tasks;
-    }
-
-    // Case 2: The Filter is not defined, call tasksService.getAllTasks
-    const tasks = this.tasksService.getAllTasks();
+  public async getAllTasks(
+    @Query() filterTaskDto: FilterTaskDto,
+  ): Promise<Task[]> {
+    const tasks = await this.tasksService.getAllTasks(filterTaskDto);
     return tasks;
   }
 
   @Get(':taskId')
-  getByTaskId(@Param('taskId') taskId: Task['id']): Task | null {
-    const tasks = this.tasksService.getTaskByID(taskId);
+  public async getByTaskId(@Param('taskId') taskId: Task['id']): Promise<Task> {
+    const tasks = await this.tasksService.getTaskByID(taskId);
     return tasks;
   }
 
   @Post()
-  createTask(@Body() createTaskDto: CreateTaskDto): Task['id'] {
-    const taskId = this.tasksService.createTask(createTaskDto);
+  public async createTask(
+    @Body() createTaskDto: CreateTaskDto,
+  ): Promise<Task['id']> {
+    const taskId = await this.tasksService.createTask(createTaskDto);
 
     return taskId;
   }
 
   @Delete(':taskId')
-  deleteTask(@Param('taskId') taskId: Task['id']) {
-    const taskIdDeleted = this.tasksService.deleteTaskByID(taskId);
+  public async deleteTask(@Param('taskId') taskId: Task['id']): Promise<void> {
+    const taskIdDeleted = await this.tasksService.deleteTaskByID(taskId);
 
     return taskIdDeleted;
   }
@@ -62,11 +59,14 @@ export class TasksController {
   }
 
   @Patch(':taskId')
-  updateTask(
+  public async updateTask(
     @Param('taskId') taskId: Task['id'],
     @Body() updateTaskDto: UpdateTaskDto,
-  ) {
-    const taskUpdated = this.tasksService.updateTaskById(taskId, updateTaskDto);
+  ): Promise<Task> {
+    const taskUpdated = await this.tasksService.updateTaskById(
+      taskId,
+      updateTaskDto,
+    );
 
     return taskUpdated;
   }
