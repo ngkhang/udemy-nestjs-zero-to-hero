@@ -18,7 +18,7 @@ export class AuthController {
   @Post('/signin')
   async signIn(
     @Body() authCredentialDto: AuthCredentialDto,
-  ): Promise<Omit<User, 'password'>> {
+  ): Promise<Omit<User, 'password'> & { accessToken: string }> {
     const user = await this.authService.signIn(authCredentialDto);
     return user;
   }
