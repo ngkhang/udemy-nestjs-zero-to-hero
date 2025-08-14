@@ -44,6 +44,7 @@ export class AuthService {
     return {
       id: user.id,
       username: user.username,
+      tasks: user.tasks,
       accessToken,
     };
   }
