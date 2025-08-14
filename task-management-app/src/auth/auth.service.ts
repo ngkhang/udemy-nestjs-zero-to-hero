@@ -20,7 +20,7 @@ export class AuthService {
 
   async signIn(
     authCredentialDto: AuthCredentialDto,
-  ): Promise<Omit<User, 'password'> & { accessToken: string }> {
+  ): Promise<Omit<User, 'password' | 'tasks'> & { accessToken: string }> {
     const user = await this.userRepository.findOne({
       where: {
         username: authCredentialDto.username,
@@ -44,7 +44,6 @@ export class AuthService {
     return {
       id: user.id,
       username: user.username,
-      tasks: user.tasks,
       accessToken,
     };
   }

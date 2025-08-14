@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Logger,
   Param,
   Patch,
   Post,
@@ -21,6 +22,10 @@ import { User } from 'src/auth/user.entity';
 @Controller('tasks')
 @UseGuards(AuthGuard())
 export class TasksController {
+  private readonly logger = new Logger(TasksController.name, {
+    timestamp: true,
+  });
+
   constructor(private readonly tasksService: TasksService) {}
 
   @Get()
@@ -29,6 +34,7 @@ export class TasksController {
     @GetUser() user: User,
   ): Promise<Task[]> {
     const tasks = await this.tasksService.getAllTasks(user.id, filterTaskDto);
+    this.logger.verbose(`User: ${user.username} get all tasks`);
     return tasks;
   }
 
@@ -38,6 +44,8 @@ export class TasksController {
     @GetUser() user: User,
   ): Promise<Task> {
     const tasks = await this.tasksService.getTaskByID(taskId, user);
+
+    this.logger.verbose(`User: ${user.username} get task by id`);
     return tasks;
   }
 
@@ -48,6 +56,7 @@ export class TasksController {
   ): Promise<Task['id']> {
     const taskId = await this.tasksService.createTask(user.id, createTaskDto);
 
+    this.logger.verbose(`User: ${user.username} create task`);
     return taskId;
   }
 
@@ -60,6 +69,8 @@ export class TasksController {
       taskId,
       user.id,
     );
+
+    this.logger.verbose(`User: ${user.username} delete task`);
 
     return taskIdDeleted;
   }
@@ -76,6 +87,8 @@ export class TasksController {
       user,
     );
 
+    this.logger.verbose(`User: ${user.username} update status of task`);
+
     return taskUpdated;
   }
 
@@ -91,6 +104,7 @@ export class TasksController {
       user,
     );
 
+    this.logger.verbose(`User: ${user.username} update task`);
     return taskUpdated;
   }
 }
