@@ -15,6 +15,8 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 import { FilterTaskDto } from './dto/filter-task.dto';
 import { Task } from './task.entity';
 import { AuthGuard } from '@nestjs/passport';
+import { GetUser } from 'src/decorators/get-user.decorator';
+import { User } from 'src/auth/user.entity';
 
 @Controller('tasks')
 @UseGuards(AuthGuard())
@@ -24,29 +26,40 @@ export class TasksController {
   @Get()
   public async getAllTasks(
     @Query() filterTaskDto: FilterTaskDto,
+    @GetUser() user: User,
   ): Promise<Task[]> {
-    const tasks = await this.tasksService.getAllTasks(filterTaskDto);
+    const tasks = await this.tasksService.getAllTasks(user.id, filterTaskDto);
     return tasks;
   }
 
   @Get(':taskId')
-  public async getByTaskId(@Param('taskId') taskId: Task['id']): Promise<Task> {
-    const tasks = await this.tasksService.getTaskByID(taskId);
+  public async getByTaskId(
+    @Param('taskId') taskId: Task['id'],
+    @GetUser() user: User,
+  ): Promise<Task> {
+    const tasks = await this.tasksService.getTaskByID(taskId, user);
     return tasks;
   }
 
   @Post()
   public async createTask(
     @Body() createTaskDto: CreateTaskDto,
+    @GetUser() user: User,
   ): Promise<Task['id']> {
-    const taskId = await this.tasksService.createTask(createTaskDto);
+    const taskId = await this.tasksService.createTask(user.id, createTaskDto);
 
     return taskId;
   }
 
   @Delete(':taskId')
-  public async deleteTask(@Param('taskId') taskId: Task['id']): Promise<void> {
-    const taskIdDeleted = await this.tasksService.deleteTaskByID(taskId);
+  public async deleteTask(
+    @Param('taskId') taskId: Task['id'],
+    @GetUser() user: User,
+  ): Promise<void> {
+    const taskIdDeleted = await this.tasksService.deleteTaskByID(
+      taskId,
+      user.id,
+    );
 
     return taskIdDeleted;
   }
@@ -55,8 +68,13 @@ export class TasksController {
   updateStatusTask(
     @Param('taskId') taskId: Task['id'],
     @Body('status') status: UpdateTaskDto['status'],
+    @GetUser() user: User,
   ) {
-    const taskUpdated = this.tasksService.updateTaskById(taskId, { status });
+    const taskUpdated = this.tasksService.updateTaskById(
+      taskId,
+      { status },
+      user,
+    );
 
     return taskUpdated;
   }
@@ -65,10 +83,12 @@ export class TasksController {
   public async updateTask(
     @Param('taskId') taskId: Task['id'],
     @Body() updateTaskDto: UpdateTaskDto,
+    @GetUser() user: User,
   ): Promise<Task> {
     const taskUpdated = await this.tasksService.updateTaskById(
       taskId,
       updateTaskDto,
+      user,
     );
 
     return taskUpdated;
