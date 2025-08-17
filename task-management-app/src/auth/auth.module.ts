@@ -7,17 +7,23 @@ import { User } from './user.entity';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from '../jwt/jwt.strategy';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule,
     PassportModule.register({
       defaultStrategy: 'jwt',
     }),
-    JwtModule.register({
-      secret: 'udemy-nestjs-secret',
-      signOptions: {
-        expiresIn: 1 * 60 * 60,
-      },
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get('JWT_SECRET'),
+        signOptions: {
+          expiresIn: 1 * 60 * 60,
+        },
+      }),
+      inject: [ConfigService],
     }),
     TypeOrmModule.forFeature([User]),
   ],
